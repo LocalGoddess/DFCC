@@ -32,7 +32,8 @@ void start_lexer( const char* code, int debug )
 
 void lex()
 {
-    while ( lexer->current_pos < strlen( lexer->code ) ) {
+    unsigned long long code_length = strlen( lexer->code );
+    while ( lexer->current_pos < code_length ) {
         if ( should_stop() ) {
             break;
         }
@@ -142,11 +143,14 @@ void continue_token_identifier()
 
 void continue_token_number()
 {
-    if ( !is_numeral_compatible( lexer->current_char ) || !is_numeral_compatible( look_ahead() ) || is_numeral_ending(lexer->current_char) ) {
+    if ( !is_numeral_compatible( lexer->current_char ) || !is_numeral_compatible( look_ahead() ) ||
+         is_numeral_ending( lexer->current_char ) )
+    {
         // this will allow multiple decimals but that's fine for now
         lexer->current_token_type = LITERAL;
         create_token();
-    } else {
+    }
+    else {
         append_char( lexer->current_char );
     }
 }
@@ -160,7 +164,7 @@ void handle_new_line()
 int should_stop()
 {
     switch ( lexer->current_char ) {
-        case '\0':
+        case '\0':  // Null char
         case -1:    // End of line
         case '\032':// ^Z End of File
             return 1;
@@ -192,10 +196,10 @@ int is_numeral_compatible( char c )
     return 0;
 }
 
-int is_numeral_ending(char c)
+int is_numeral_ending( char c )
 {
     // Prob a better way to do this
-    if (c == 'L' || c == 'l' || c == 'f' || c == 'F') {
+    if ( c == 'L' || c == 'l' || c == 'f' || c == 'F' ) {
         return 1;
     }
     return 0;
