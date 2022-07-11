@@ -142,13 +142,11 @@ void continue_token_identifier()
 
 void continue_token_number()
 {
-    // TODO(Chloe): Remember longs can end with L, floats can end with F, and doubles can end with D(I think)
-    if ( !is_numeral_compatible( lexer->current_char ) || !is_numeral_compatible( look_ahead() ) ) {
+    if ( !is_numeral_compatible( lexer->current_char ) || !is_numeral_compatible( look_ahead() ) || is_numeral_ending(lexer->current_char) ) {
         // this will allow multiple decimals but that's fine for now
         lexer->current_token_type = LITERAL;
         create_token();
-    }
-    else {
+    } else {
         append_char( lexer->current_char );
     }
 }
@@ -194,6 +192,14 @@ int is_numeral_compatible( char c )
     return 0;
 }
 
+int is_numeral_ending(char c)
+{
+    // Prob a better way to do this
+    if (c == 'L' || c == 'l' || c == 'f' || c == 'F') {
+        return 1;
+    }
+    return 0;
+}
 
 void create_token()
 {

@@ -1,12 +1,13 @@
 #ifndef DFCC_LEXER_H
 #define DFCC_LEXER_H
 
-enum lexer_token_type {
-    IDENTIFIER, // Things like variable names, function names, etc...
-    KEYWORD, // Things like int, char, void, struct, enum. More found here https://en.cppreference.com/w/c/keyword
-    LITERAL, // 10, 0xFF, 0o88, 'c', "Char*", 3.14 might make each literal its own thing /shrug
-    OPERATOR, // + - * / < > & = !
-    GRAMMAR  // ( ) { } [ ] ; ,
+enum lexer_token_type
+{
+    IDENTIFIER,// Things like variable names, function names, etc...
+    KEYWORD,   // Things like int, char, void, struct, enum. More found here https://en.cppreference.com/w/c/keyword
+    LITERAL,   // 10, 0xFF, 0o88, 'c', "Char*", 3.14 might make each literal its own thing /shrug
+    OPERATOR,  // + - * / < > & = !
+    GRAMMAR    // ( ) { } [ ] ; ,
 };
 
 struct lexer_token {
@@ -18,7 +19,6 @@ struct lexer_token {
 
     struct lexer_token* next;
     struct lexer_token* previous;
-
 };
 
 struct lexer {
@@ -31,7 +31,7 @@ struct lexer {
     //// Lexer Working Data ////
     int current_pos; /* The current read index */
 
-    char current_char; /* The current char currently being analyzed */
+    char current_char;  /* The current char currently being analyzed */
     char previous_char; /* The previous char worked on. Just makes it easier to check for escapes */
 
     unsigned long current_line; /* The current line and column being worked on */
@@ -39,12 +39,11 @@ struct lexer {
 
     unsigned long token_count; /* The current amount of tokens */
 
-    int findingToken; /* bool - if true we have a target for a token */
+    int findingToken;                         /* bool - if true we have a target for a token */
     enum lexer_token_type current_token_type; /* see above */
-    char* current_context_data; /* the current context data */
+    char* current_context_data;               /* the current context data */
     unsigned long context_len;
     ///////////////////////////
-
 };
 
 struct lexer* lexer; /* Main lexer "instance" for DFCC */
@@ -64,11 +63,12 @@ void continue_token();
 void handle_new_line();
 
 int should_stop(); /* should the lexer stop */
-void append_char(char c);
-int is_identifier_compatible(char c);
-int is_numeral_compatible(char c);
+void append_char( char c );
+int is_identifier_compatible( char c );
+int is_numeral_compatible( char c );
+int is_numeral_ending( char c );
 
 void create_token();
-void append_single_char_token(char c);
+void append_single_char_token( char c );
 
 #endif// DFCC_LEXER_H
