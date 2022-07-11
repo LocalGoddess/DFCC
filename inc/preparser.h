@@ -23,6 +23,8 @@ enum preparser_token_type {
 
     /* Literal types */
     PRE_INT,
+    PRE_LONG,
+    PRE_FLOAT
 };
 
 struct preparser_token {

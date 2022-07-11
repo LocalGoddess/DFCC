@@ -60,21 +60,18 @@ void preparse_grammar()
     char grammar = preparser->current_token->context[0];// Just assume its always one char for now unless there is a two
     switch ( grammar ) {
         default:
-            finish_preparser_token();
             break;
         case ';':
             preparser->current_type = PRE_STATEMENT_END;
-            finish_preparser_token();
             break;
         case '{':
             preparser->current_type = PRE_OPEN_STATEMENT;
-            finish_preparser_token();
             break;
         case '}':
             preparser->current_type = PRE_CLOSE_STATEMENT;
-            finish_preparser_token();
             break;
     }
+    finish_preparser_token();
 }
 
 void preparse_literal()
@@ -82,11 +79,11 @@ void preparse_literal()
     if (preparser->current_token->context[0] != '\'' || preparser->current_token->context[0] != '"') {
         // number
         if ( strchr(preparser->current_token->context, '.') ) {
-            // float
+            preparser->current_type = PRE_FLOAT;
         } else {
             // long or int
             if ( strchr(preparser->current_token->context, 'L') || strchr(preparser->current_token->context, 'l')) {
-                // long
+                preparser->current_type = PRE_LONG;
             } else {
                 preparser->current_type = PRE_INT;
             }
