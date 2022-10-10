@@ -3,8 +3,8 @@
 
 int main( int argc, const char** argv )
 {
-    printf( "Hello, World!" );
-    lex_init("int\0");
+    printf( "Hello, World!\n" );
+    lex_init("int main(){return 1;}\0");
     lex();
 
 

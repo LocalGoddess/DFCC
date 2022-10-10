@@ -121,6 +121,11 @@ void find_token()
             lexer->current_token.column = lexer->column;
             lexer->current_token.type = LIT_INT;
             append_context_char( lexer->current );
+
+            if ( !is_valid_number( peek() ) ) {
+                finish_token();
+            }
+
             break;
         }
 
@@ -202,6 +207,10 @@ void finish_token()
     lexer->finding_token = 1;
     lexer->current_token = create_empty();
     has_decimal = 0;
+
+    lexer->current_content = (char*) calloc( 1, sizeof( char ) );
+    lexer->current_content_size = 0;
+
 }
 
 void create_single_char_token( enum token_type type )
@@ -211,12 +220,15 @@ void create_single_char_token( enum token_type type )
     lexer->current_token.column = lexer->column;
     lexer->current_token.type = type;
     append_context_char( lexer->current );
+    finish_token();
 }
 
 void continue_number()
 {
-    if ( is_valid_number( lexer->current ) ) {
-        append_context_char( lexer->current );
+    append_context_char(lexer->current);
+    if ( !is_valid_number( peek() ) ) {
+        finish_token();
+        return;
     }
 
     if ( lexer->current == '.' ) {
@@ -228,18 +240,15 @@ void continue_number()
             // TODO(Chloe) Error
         }
     }
-
-    if ( !is_number_end( peek() ) ) {
+    if ( is_number_end( peek() ) ) {
         if ( peek() == 'l' || peek() == 'L' ) {
             lexer->current_token.type = LIT_LONG;
+            finish_token();
         }
         if ( peek() == 'f' || peek() == 'F' ) {
             lexer->current_token.type = LIT_FLOAT;
+            finish_token();
         }
-    }
-
-    if ( !is_valid_number( peek() ) ) {
-        finish_token();
     }
 }
 
@@ -262,17 +271,14 @@ void continue_char_ptr()
 
 void continue_identifier()
 {
-    printf("Continuing Identifier, Content %s, Current %c, Peek %c\n", lexer->current_content, lexer->current, peek());
     append_context_char( lexer->current );
     if ( token_from_keyword_str( lexer->current_content ) != NONE ) {
-        printf("hello %s\n", lexer->current_content);
         lexer->current_token.type = token_from_keyword_str( lexer->current_content );
         finish_token();
         return;
     }
 
     if ( !is_valid_identifier( peek() ) ) {
-        printf("Ending\n");
         finish_token();
     }
 }
@@ -328,9 +334,6 @@ void append_context_char( char c )
     lexer->current_content = realloced;
     lexer->current_content[lexer->current_content_size - 1] = c;
     lexer->current_content[lexer->current_content_size] = '\0';
-
-
-    printf( "Current: %c After Append: %s\n", c, lexer->current_content );
 }
 
 struct lexer_token create_empty()
