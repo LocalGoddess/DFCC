@@ -72,11 +72,8 @@ enum token_type
 
 };
 
-uint32_t token_is_literal_number(enum token_type type);
 const char* token_keyword_str(enum token_type type);
 enum token_type token_from_keyword_str(const char* keyword);
-
-uint32_t str_is_keyword(char* c);
 
 struct lexer_token {
     enum token_type type;

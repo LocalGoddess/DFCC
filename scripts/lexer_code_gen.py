@@ -1,28 +1,16 @@
 def gen_token_from_keyword_str(tokens):
-    present_if = False
     code = "enum token_type token_from_keyword_str( const char* keyword )\n{\n"
+    code += "\t// !DO NOT EDIT!\n"
+    code += "\t// This function was generated using code!\n"
+    code += "\t// If you would like to change it please change its contents in scripts/lexer_code_gen.py\n"
+    code += "\t// !DO NOT EDIT!\n\n"
     for i in range(len(tokens)):
         tkn = tokens[i]
-        if present_if:
-            code += "else "
-            present_if = True
-        code += "if ( strcmp( keyword, \"" + str(tkn).lower() + "\" ) ) {\n\t return " + str(tkn).upper() + ";\n\t}"
+        code += "\tif ( strncmp( keyword, \"" + str(tkn).lower() + "\" ) == 0 ) {\n"
+        code += "\t\treturn " + tkn.upper() + ";\n"
+        code += "\t}\n"
+    code += "\treturn NONE;\n}"
     return code
-
-
-def gen_str_is_keyword(tokens):
-    present_if = False
-    code = "uint32_t str_is_keyword( char* c );\n{\n"
-    for i in range(len(tokens)):
-        tkn = tokens[i]
-        if present_if == False:
-            code += "else "
-        else:
-            present_if = True
-        code += "if ( strcmp( c, \"" + str(tkn).lower() + "\" ) ) {\n\t return 1;\n\t}"
-    code += "\nreturn 0;\n}"
-    return code
-
 
 tkns = ['AUTO',
         'BREAK',

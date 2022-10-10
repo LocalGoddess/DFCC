@@ -342,19 +342,6 @@ struct lexer_token create_empty()
     return empty;
 }
 
-uint32_t token_is_literal_number( enum token_type type )
-{
-    switch ( type ) {
-        case LIT_INT:
-        case LIT_LONG:
-        case LIT_FLOAT:
-        case LIT_DOUBLE:
-            return 1;
-        default:
-            return 0;
-    }
-}
-
 const char* token_keyword_str( enum token_type type )
 {
     switch ( type ) {
@@ -434,6 +421,11 @@ const char* token_keyword_str( enum token_type type )
 
 enum token_type token_from_keyword_str( const char* keyword )
 {
+    // !DO NOT EDIT!
+    // This function was generated using code
+    // if you would like to change it please change its contents in scripts/lexer_code_gen.py
+    // !DO NOT EDIT!
+
     if ( strcmp( keyword, "auto" ) == 0 ) {
         return AUTO;
     }
@@ -537,111 +529,4 @@ enum token_type token_from_keyword_str( const char* keyword )
         return WHILE;
     }
     return NONE;
-}
-
-uint32_t str_is_keyword( char* c )
-{
-    if ( strcmp( c, "auto" ) ) {
-        return 1;
-    }
-    else if ( strcmp( c, "break" ) ) {
-        return 1;
-    }
-    else if ( strcmp( c, "case" ) ) {
-        return 1;
-    }
-    else if ( strcmp( c, "char" ) ) {
-        return 1;
-    }
-    else if ( strcmp( c, "const" ) ) {
-        return 1;
-    }
-    else if ( strcmp( c, "continue" ) ) {
-        return 1;
-    }
-    else if ( strcmp( c, "default" ) ) {
-        return 1;
-    }
-    else if ( strcmp( c, "do" ) ) {
-        return 1;
-    }
-    else if ( strcmp( c, "double" ) ) {
-        return 1;
-    }
-    else if ( strcmp( c, "else" ) ) {
-        return 1;
-    }
-    else if ( strcmp( c, "enum" ) ) {
-        return 1;
-    }
-    else if ( strcmp( c, "extern" ) ) {
-        return 1;
-    }
-    else if ( strcmp( c, "float" ) ) {
-        return 1;
-    }
-    else if ( strcmp( c, "for" ) ) {
-        return 1;
-    }
-    else if ( strcmp( c, "goto" ) ) {
-        return 1;
-    }
-    else if ( strcmp( c, "if" ) ) {
-        return 1;
-    }
-    else if ( strcmp( c, "inline" ) ) {
-        return 1;
-    }
-    else if ( strcmp( c, "int" ) ) {
-        return 1;
-    }
-    else if ( strcmp( c, "long" ) ) {
-        return 1;
-    }
-    else if ( strcmp( c, "register" ) ) {
-        return 1;
-    }
-    else if ( strcmp( c, "restrict" ) ) {
-        return 1;
-    }
-    else if ( strcmp( c, "return" ) ) {
-        return 1;
-    }
-    else if ( strcmp( c, "short" ) ) {
-        return 1;
-    }
-    else if ( strcmp( c, "signed" ) ) {
-        return 1;
-    }
-    else if ( strcmp( c, "sizeof" ) ) {
-        return 1;
-    }
-    else if ( strcmp( c, "static" ) ) {
-        return 1;
-    }
-    else if ( strcmp( c, "struct" ) ) {
-        return 1;
-    }
-    else if ( strcmp( c, "switch" ) ) {
-        return 1;
-    }
-    else if ( strcmp( c, "typedef" ) ) {
-        return 1;
-    }
-    else if ( strcmp( c, "union" ) ) {
-        return 1;
-    }
-    else if ( strcmp( c, "unsigned" ) ) {
-        return 1;
-    }
-    else if ( strcmp( c, "void" ) ) {
-        return 1;
-    }
-    else if ( strcmp( c, "volatile" ) ) {
-        return 1;
-    }
-    else if ( strcmp( c, "while" ) ) {
-        return 1;
-    }
-    return 0;
 }
