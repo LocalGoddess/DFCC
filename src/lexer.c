@@ -2,6 +2,7 @@
 #include <malloc.h>
 #include <string.h>
 
+#define DFCC_DEBUG
 #ifdef DFCC_DEBUG
 #include <stdio.h>
 #endif
@@ -10,6 +11,8 @@ char valid_number_chars[13] = "0123456789-.\0";
 char valid_identifier_chars[54] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_\0";
 
 uint32_t has_decimal = 0;
+
+struct lexer* lexer;
 
 void find_token();
 void continue_token();
@@ -29,6 +32,7 @@ uint32_t is_line_ending( char c );
 void append_context_char( char c );
 struct lexer_token create_empty();
 
+
 void lex_init( const char* source )
 {
     lexer = malloc( sizeof( struct lexer ) );
@@ -43,7 +47,8 @@ void lex_init( const char* source )
     lexer->finding_token = 1;
 
     lexer->current_token = create_empty();
-    lexer->current_content = "\0";
+    lexer->current_content = (char*) calloc( 1, sizeof( char ) );
+    lexer->current_content_size = 0;
 
     lexer->first_token = NULL;
     lexer->last_token = NULL;
@@ -93,7 +98,7 @@ void find_token()
             create_single_char_token( CLOSE_CBRACKET );
             break;
         case ';':
-            create_single_char_token(SEMICOLON);
+            create_single_char_token( SEMICOLON );
             break;
 
         case ' ':
@@ -145,6 +150,7 @@ void find_token()
             lexer->current_token.line = lexer->line;
             lexer->current_token.column = lexer->column;
             lexer->current_token.type = IDENTIFIER;
+            append_context_char(lexer->current);
             break;
         }
     }
@@ -179,12 +185,6 @@ void continue_token()
 
 void finish_token()
 {
-#ifdef DFCC_DEBUG
-    printf( "[DEBUG] Finished Token! Type: %d, Content: %s, Line: %u, Column: %u", lexer->current_token.type,
-            lexer->current_token.content, lexer->current_token.line, lexer->current_token.column );
-#endif
-
-    append_context_char( '\0' );
     lexer->current_token.content = lexer->current_content;
     lexer->current_token.previous = lexer->last_token;
 
@@ -193,6 +193,11 @@ void finish_token()
     }
 
     lexer->last_token = &lexer->current_token;
+
+#ifdef DFCC_DEBUG
+    printf( "[DEBUG] Finished Token! Type: %d, Content: %s, Line: %u, Column: %u\n", lexer->current_token.type,
+            lexer->current_token.content, lexer->current_token.line, lexer->current_token.column );
+#endif
 
     lexer->finding_token = 1;
     lexer->current_token = create_empty();
@@ -241,17 +246,6 @@ void continue_number()
 void continue_char()
 {
     if ( peek() == '\'' ) {
-        char c = '\0';
-        const char* temp = lexer->current_content;
-        const char* checkData = strncat( temp, &c, 1 );
-        size_t len = strlen( checkData );
-
-        if ( ( len - 1 ) > 1 ) {
-            if ( checkData[0] != '\\' ) {
-                // TODO(Chloe): Error
-            }
-        }
-
         finish_token();
     }
     append_context_char( lexer->current );
@@ -268,16 +262,19 @@ void continue_char_ptr()
 
 void continue_identifier()
 {
-    if ( token_is_keyword( lexer->current_content ) ) {
+    printf("Continuing Identifier, Content %s, Current %c, Peek %c\n", lexer->current_content, lexer->current, peek());
+    append_context_char( lexer->current );
+    if ( token_from_keyword_str( lexer->current_content ) != NONE ) {
+        printf("hello %s\n", lexer->current_content);
         lexer->current_token.type = token_from_keyword_str( lexer->current_content );
         finish_token();
         return;
     }
 
-    if ( is_valid_identifier( peek() ) ) {
+    if ( !is_valid_identifier( peek() ) ) {
+        printf("Ending\n");
         finish_token();
     }
-    append_context_char( lexer->current );
 }
 
 /* Utility Functions */
@@ -310,7 +307,31 @@ uint32_t is_valid_identifier( char c )
     return 0;
 }
 
-void append_context_char( char c ) { strncat( lexer->current_content, &c, 1 ); }
+uint32_t is_line_ending(char c)
+{
+    switch ( c ) {
+        case '\0':
+        case -1:
+            return 1;
+        default:
+            return 0;
+    }
+}
+
+void append_context_char( char c )
+{
+    lexer->current_content_size += 1;
+    char* realloced = ( char* ) realloc( lexer->current_content, ( lexer->current_content_size + 1 ) * sizeof( char ) );
+    if ( !realloced ) {
+        fprintf( stderr, "REALLOCED IS NULL" );
+    }
+    lexer->current_content = realloced;
+    lexer->current_content[lexer->current_content_size - 1] = c;
+    lexer->current_content[lexer->current_content_size] = '\0';
+
+
+    printf( "Current: %c After Append: %s\n", c, lexer->current_content );
+}
 
 struct lexer_token create_empty()
 {
@@ -408,112 +429,216 @@ const char* token_keyword_str( enum token_type type )
     }
 }
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wstring-compare"
 enum token_type token_from_keyword_str( const char* keyword )
 {
-    if ( keyword == "auto" ) {
+    if ( strcmp( keyword, "auto" ) == 0 ) {
         return AUTO;
     }
-    else if ( keyword == "break" ) {
+    if ( strcmp( keyword, "break" ) == 0 ) {
         return BREAK;
     }
-    else if ( keyword == "case" ) {
+    if ( strcmp( keyword, "case" ) == 0 ) {
         return CASE;
     }
-    else if ( keyword == "char" ) {
+    if ( strcmp( keyword, "char" ) == 0 ) {
         return CHAR;
     }
-    else if ( keyword == "const" ) {
+    if ( strcmp( keyword, "const" ) == 0 ) {
         return CONST;
     }
-    else if ( keyword == "continue" ) {
+    if ( strcmp( keyword, "continue" ) == 0 ) {
         return CONTINUE;
     }
-    else if ( keyword == "default" ) {
+    if ( strcmp( keyword, "default" ) == 0 ) {
         return DEFAULT;
     }
-    else if ( keyword == "do" ) {
+    if ( strcmp( keyword, "do" ) == 0 ) {
         return DO;
     }
-    else if ( keyword == "double" ) {
+    if ( strcmp( keyword, "double" ) == 0 ) {
         return DOUBLE;
     }
-    else if ( keyword == "else" ) {
+    if ( strcmp( keyword, "else" ) == 0 ) {
         return ELSE;
     }
-    else if ( keyword == "enum" ) {
+    if ( strcmp( keyword, "enum" ) == 0 ) {
         return ENUM;
     }
-    else if ( keyword == "extern" ) {
+    if ( strcmp( keyword, "extern" ) == 0 ) {
         return EXTERN;
     }
-    else if ( keyword == "float" ) {
+    if ( strcmp( keyword, "float" ) == 0 ) {
         return FLOAT;
     }
-    else if ( keyword == "for" ) {
+    if ( strcmp( keyword, "for" ) == 0 ) {
         return FOR;
     }
-    else if ( keyword == "goto" ) {
+    if ( strcmp( keyword, "goto" ) == 0 ) {
         return GOTO;
     }
-    else if ( keyword == "if" ) {
+    if ( strcmp( keyword, "if" ) == 0 ) {
         return IF;
     }
-    else if ( keyword == "inline" ) {
+    if ( strcmp( keyword, "inline" ) == 0 ) {
         return INLINE;
     }
-    else if ( keyword == "int" ) {
+    if ( strcmp( keyword, "int" ) == 0 ) {
         return INT;
     }
-    else if ( keyword == "long" ) {
+    if ( strcmp( keyword, "long" ) == 0 ) {
         return LONG;
     }
-    else if ( keyword == "register" ) {
+    if ( strcmp( keyword, "register" ) == 0 ) {
         return REGISTER;
     }
-    else if ( keyword == "restrict" ) {
+    if ( strcmp( keyword, "restrict" ) == 0 ) {
         return RESTRICT;
     }
-    else if ( keyword == "return" ) {
+    if ( strcmp( keyword, "return" ) == 0 ) {
         return RETURN;
     }
-    else if ( keyword == "short" ) {
+    if ( strcmp( keyword, "short" ) == 0 ) {
         return SHORT;
     }
-    else if ( keyword == "signed" ) {
+    if ( strcmp( keyword, "signed" ) == 0 ) {
         return SIGNED;
     }
-    else if ( keyword == "sizeof" ) {
+    if ( strcmp( keyword, "sizeof" ) == 0 ) {
         return SIZEOF;
     }
-    else if ( keyword == "static" ) {
+    if ( strcmp( keyword, "static" ) == 0 ) {
         return STATIC;
     }
-    else if ( keyword == "struct" ) {
+    if ( strcmp( keyword, "struct" ) == 0 ) {
         return STRUCT;
     }
-    else if ( keyword == "switch" ) {
+    if ( strcmp( keyword, "switch" ) == 0 ) {
         return SWITCH;
     }
-    else if ( keyword == "typedef" ) {
+    if ( strcmp( keyword, "typedef" ) == 0 ) {
         return TYPEDEF;
     }
-    else if ( keyword == "union" ) {
+    if ( strcmp( keyword, "union" ) == 0 ) {
         return UNION;
     }
-    else if ( keyword == "unsigned" ) {
+    if ( strcmp( keyword, "unsigned" ) == 0 ) {
         return UNSIGNED;
     }
-    else if ( keyword == "void" ) {
+    if ( strcmp( keyword, "void" ) == 0 ) {
         return VOID;
     }
-    else if ( keyword == "volatile" ) {
+    if ( strcmp( keyword, "volatile" ) == 0 ) {
         return VOLATILE;
     }
-    else if ( keyword == "while" ) {
+    if ( strcmp( keyword, "while" ) == 0 ) {
         return WHILE;
     }
     return NONE;
 }
-#pragma clang diagnostic pop
+
+uint32_t str_is_keyword( char* c )
+{
+    if ( strcmp( c, "auto" ) ) {
+        return 1;
+    }
+    else if ( strcmp( c, "break" ) ) {
+        return 1;
+    }
+    else if ( strcmp( c, "case" ) ) {
+        return 1;
+    }
+    else if ( strcmp( c, "char" ) ) {
+        return 1;
+    }
+    else if ( strcmp( c, "const" ) ) {
+        return 1;
+    }
+    else if ( strcmp( c, "continue" ) ) {
+        return 1;
+    }
+    else if ( strcmp( c, "default" ) ) {
+        return 1;
+    }
+    else if ( strcmp( c, "do" ) ) {
+        return 1;
+    }
+    else if ( strcmp( c, "double" ) ) {
+        return 1;
+    }
+    else if ( strcmp( c, "else" ) ) {
+        return 1;
+    }
+    else if ( strcmp( c, "enum" ) ) {
+        return 1;
+    }
+    else if ( strcmp( c, "extern" ) ) {
+        return 1;
+    }
+    else if ( strcmp( c, "float" ) ) {
+        return 1;
+    }
+    else if ( strcmp( c, "for" ) ) {
+        return 1;
+    }
+    else if ( strcmp( c, "goto" ) ) {
+        return 1;
+    }
+    else if ( strcmp( c, "if" ) ) {
+        return 1;
+    }
+    else if ( strcmp( c, "inline" ) ) {
+        return 1;
+    }
+    else if ( strcmp( c, "int" ) ) {
+        return 1;
+    }
+    else if ( strcmp( c, "long" ) ) {
+        return 1;
+    }
+    else if ( strcmp( c, "register" ) ) {
+        return 1;
+    }
+    else if ( strcmp( c, "restrict" ) ) {
+        return 1;
+    }
+    else if ( strcmp( c, "return" ) ) {
+        return 1;
+    }
+    else if ( strcmp( c, "short" ) ) {
+        return 1;
+    }
+    else if ( strcmp( c, "signed" ) ) {
+        return 1;
+    }
+    else if ( strcmp( c, "sizeof" ) ) {
+        return 1;
+    }
+    else if ( strcmp( c, "static" ) ) {
+        return 1;
+    }
+    else if ( strcmp( c, "struct" ) ) {
+        return 1;
+    }
+    else if ( strcmp( c, "switch" ) ) {
+        return 1;
+    }
+    else if ( strcmp( c, "typedef" ) ) {
+        return 1;
+    }
+    else if ( strcmp( c, "union" ) ) {
+        return 1;
+    }
+    else if ( strcmp( c, "unsigned" ) ) {
+        return 1;
+    }
+    else if ( strcmp( c, "void" ) ) {
+        return 1;
+    }
+    else if ( strcmp( c, "volatile" ) ) {
+        return 1;
+    }
+    else if ( strcmp( c, "while" ) ) {
+        return 1;
+    }
+    return 0;
+}
