@@ -193,6 +193,8 @@ void finish_token()
     lexer->current_token.content = lexer->current_content;
     lexer->current_token.previous = lexer->last_token;
 
+    lexer->last_token->next = &lexer->current_token;
+
     if ( lexer->first_token == NULL ) {
         lexer->first_token = &lexer->current_token;
     }

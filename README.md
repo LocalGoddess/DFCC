@@ -14,7 +14,7 @@ mcdiamondfire.com.
 
 ## Current Goal
 
-The current goal for DFCC is to have it fully compile the example code in [examples/test_one.c](examples/test_one.c).
+The current goal for DFCC is to have it fully compile the example code in [examples/test_one.c](examples/example_one.c).
 Once that is done it is safe to assume the core parts of the compiler are done
 
 ## Goal For Release
