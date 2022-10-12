@@ -47,7 +47,7 @@ void lex_init( const char* source )
     lexer->finding_token = 1;
 
     lexer->current_token = create_empty();
-    lexer->current_content = (char*) calloc( 1, sizeof( char ) );
+    lexer->current_content = ( char* ) calloc( 1, sizeof( char ) );
     lexer->current_content_size = 0;
 
     lexer->first_token = NULL;
@@ -155,7 +155,7 @@ void find_token()
             lexer->current_token.line = lexer->line;
             lexer->current_token.column = lexer->column;
             lexer->current_token.type = IDENTIFIER;
-            append_context_char(lexer->current);
+            append_context_char( lexer->current );
             break;
         }
     }
@@ -210,9 +210,8 @@ void finish_token()
     lexer->current_token = create_empty();
     has_decimal = 0;
 
-    lexer->current_content = (char*) calloc( 1, sizeof( char ) );
+    lexer->current_content = ( char* ) calloc( 1, sizeof( char ) );
     lexer->current_content_size = 0;
-
 }
 
 void create_single_char_token( enum token_type type )
@@ -227,7 +226,7 @@ void create_single_char_token( enum token_type type )
 
 void continue_number()
 {
-    append_context_char(lexer->current);
+    append_context_char( lexer->current );
     if ( !is_valid_number( peek() ) ) {
         finish_token();
         return;
@@ -315,7 +314,7 @@ uint32_t is_valid_identifier( char c )
     return 0;
 }
 
-uint32_t is_line_ending(char c)
+uint32_t is_line_ending( char c )
 {
     switch ( c ) {
         case '\0':

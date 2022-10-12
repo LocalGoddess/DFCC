@@ -64,16 +64,16 @@ enum token_type
     SEMICOLON,
     END_OF_LINE = SEMICOLON,
 
-    OPEN_PARENTH,   // (
-    CLOSE_PARENTH,  // )
+    OPEN_PARENTH, // (
+    CLOSE_PARENTH,// )
 
-    OPEN_CBRACKET,  // {
-    CLOSE_CBRACKET, // }
+    OPEN_CBRACKET, // {
+    CLOSE_CBRACKET,// }
 
 };
 
-const char* token_keyword_str(enum token_type type);
-enum token_type token_from_keyword_str(const char* keyword);
+const char* token_keyword_str( enum token_type type );
+enum token_type token_from_keyword_str( const char* keyword );
 
 struct lexer_token {
     enum token_type type;
