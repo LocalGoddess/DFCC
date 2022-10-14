@@ -3,6 +3,16 @@
 
 #include <lexer.h>
 
+#define PARSER_TYPE_NULL 0x00000
+#define PARSER_TYPE_INT 0x000002
+#define PARSER_TYPE_LONG 0x000004
+#define PARSER_TYPE_FLOAT 0x000006
+#define PARSER_TYPE_DOUBLE 0x000008
+
+#define PARSER_TYPE_CHAR 0x00000A
+
+#define PARSER_TYPE_POINTER 0xF00000
+
 struct return_statement {
     uint32_t type;
     void* value;
