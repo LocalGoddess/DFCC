@@ -23,7 +23,7 @@ void parse_init( struct lexer* l )
 
     parser->current_statement = NULL;
 
-    parser->current_compound_statement = malloc(sizeof(union statement));
+    parser->current_compound_statement = malloc(sizeof(struct statement));
     parser->current_compound_statement_size = 0;
 
 }

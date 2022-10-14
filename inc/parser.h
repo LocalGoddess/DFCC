@@ -8,10 +8,19 @@ struct return_statement {
     void* value;
 };
 
-union statement
+enum statement_kind {
+    SK_RETURN
+};
+
+union statement_value
 {
     // different statements here
     struct return_statement return_statement;
+};
+
+struct statement {
+    union statement_value value;
+    enum statement_kind kind;
 };
 
 struct function_argument {
@@ -29,7 +38,7 @@ struct function_definition_node {
     struct function_argument* first_argument;
     struct function_argument* last_argument;
 
-    union statement* body;
+    struct statement* body;
     uint32_t statement_size;
 };
 
@@ -42,9 +51,9 @@ struct parser {
     struct function_definition_node* function_definitions;
     uint32_t function_definition_count;
 
-    union statement* current_statement;
+    struct statement* current_statement;
 
-    union statement* current_compound_statement;
+    struct statement* current_compound_statement;
     uint32_t* current_compound_statement_size;
 };
 
