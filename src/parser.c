@@ -69,6 +69,7 @@ void find_node()
             stmnt.value = v;
 
             parser->current_statement = &stmnt;
+            parser->index += 1;
             break;
         case INT:
             // TODO(Chloe) This will have to be entirely reworked when
