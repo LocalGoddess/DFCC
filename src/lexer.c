@@ -343,6 +343,22 @@ struct lexer_token create_empty()
     return empty;
 }
 
+uint32_t is_token_type( enum token_type type )
+{
+    switch (type) {
+        case INT:
+        case LONG:
+        case FLOAT:
+        case DOUBLE:
+        case CHAR:
+            return 1;
+
+        default:
+            return 0;
+    }
+}
+
+
 const char* token_keyword_str( enum token_type type )
 {
     switch ( type ) {

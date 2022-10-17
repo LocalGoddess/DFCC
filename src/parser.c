@@ -8,6 +8,7 @@ void continue_node();
 
 uint32_t get_token_count();
 uint32_t get_token_literal_type( struct lexer_token* );
+uint32_t get_token_type( struct lexer_token* );
 struct lexer_token* get_token_from_index( uint32_t index );
 
 
@@ -52,33 +53,26 @@ void parse()
 
 void find_node()
 {
-    struct lexer_token* tkn = get_token_from_index( parser->index );
-    switch ( tkn->type ) {
-        case RETURN:
-                // TODO(Chloe) This will have to be entirely reworked when
-                // variables become a thing but it works for now because
-                // this is just to parse example_one.c
-                ;
-
-            struct statement stmnt = { .kind = SK_RETURN };
-
-            struct lexer_token* peek = get_token_from_index( parser->index + 1 );
-            struct return_statement rtn = { .type = get_token_literal_type(peek), (void*) peek->content };
-
-            union statement_value v = {.return_statement = rtn};
-            stmnt.value = v;
-
-            parser->current_statement = &stmnt;
-            parser->index += 1;
-            break;
+    struct lexer_token* current_token = get_token_from_index(parser->index);
+    switch ( current_token->type ) {
         case INT:
-            // TODO(Chloe) This will have to be entirely reworked when
-            // variables become a thing but it works for now because
-            // this is just to parse example_one.c
+        case FLOAT:
+        case LONG:
+        case DOUBLE:
+        {
+            parser->index += 1;
+            struct lexer_token* check_token = current_token->next;
+            if (current_token->next->type == POINTER) {
+                parser->index += 1;
+                check_token = get_token_from_index(parser->index);
+            }
 
+            parser->index += 1;
+            if (check_token->next->type == OPEN_PARENTH) {
+                // function call/decl
+            }
 
-
-            break;
+        }
     }
 }
 
@@ -110,6 +104,60 @@ uint32_t get_token_literal_type( struct lexer_token* token )
             return PARSER_TYPE_CHAR;
         case LIT_CHAR_PTR:
             return PARSER_TYPE_POINTER | PARSER_TYPE_CHAR;
+
+        default:
+            return PARSER_TYPE_NULL;
+    }
+}
+
+uint32_t get_token_type( struct lexer_token* token )
+{
+    switch ( token->type ) {
+        case INT:
+        {
+            uint32_t type = PARSER_TYPE_INT;
+            if (token->next->type == POINTER) {
+                type |= PARSER_TYPE_POINTER;
+            }
+
+            return type;
+        }
+        case LONG:
+        {
+            uint32_t type = PARSER_TYPE_LONG;
+            if (token->next->type == POINTER) {
+                type |= PARSER_TYPE_POINTER;
+            }
+
+            return type;
+        }
+        case FLOAT:
+        {
+            uint32_t type = PARSER_TYPE_FLOAT;
+            if (token->next->type == POINTER) {
+                type |= PARSER_TYPE_POINTER;
+            }
+
+            return type;
+        }
+        case DOUBLE:
+        {
+            uint32_t type = PARSER_TYPE_DOUBLE;
+            if (token->next->type == POINTER) {
+                type |= PARSER_TYPE_POINTER;
+            }
+
+            return type;
+        }
+        case CHAR:
+        {
+            uint32_t type = PARSER_TYPE_CHAR;
+            if (token->next->type == POINTER) {
+                type |= PARSER_TYPE_POINTER;
+            }
+
+            return type;
+        };
 
         default:
             return PARSER_TYPE_NULL;

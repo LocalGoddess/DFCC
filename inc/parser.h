@@ -64,7 +64,7 @@ struct parser {
     struct statement* current_statement;
 
     struct statement* current_compound_statement;
-    uint32_t* current_compound_statement_size;
+    uint32_t current_compound_statement_size;
 };
 
 void parse_init( struct lexer* l );

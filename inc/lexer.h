@@ -64,14 +64,19 @@ enum token_type
     SEMICOLON,
     END_OF_LINE = SEMICOLON,
 
+    COMMA,
+
     OPEN_PARENTH, // (
     CLOSE_PARENTH,// )
 
     OPEN_CBRACKET, // {
     CLOSE_CBRACKET,// }
 
+    POINTER,
+
 };
 
+uint32_t is_token_type( enum token_type type );
 const char* token_keyword_str( enum token_type type );
 enum token_type token_from_keyword_str( const char* keyword );
 
